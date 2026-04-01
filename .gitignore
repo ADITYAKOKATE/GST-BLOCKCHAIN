@@ -1,0 +1,10 @@
+node_modules/
+artifacts/
+cache/
+*.log
+*.txt
+.env
+.DS_Store
+dist/
+coverage/
+typechain-types/

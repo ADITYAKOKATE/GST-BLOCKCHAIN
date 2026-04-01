@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Chain - Professional Blockchain Tax Ledger</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">GST Chain</div>
+    <div class="wallet-status">
+        <span id="statusIndicator" class="status-indicator"></span>
+        <span id="walletAddress" style="color: white; font-size: 0.8rem; opacity: 0.7;">Disconnected</span>
+        <button id="connectBtn" class="btn-primary btn-connect" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+</header>
+
+<main class="dashboard">
+    <!-- CREATE SECTION -->
+    <section class="card">
+        <h2 class="card-title">Issuer Dashboard</h2>
+        <div class="form-group">
+            <label for="invoiceId">Invoice ID</label>
+            <input id="invoiceId" placeholder="e.g. INV-001" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="seller">Seller Name</label>
+            <input id="seller" placeholder="e.g. Acme Corp" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="buyer">Buyer Name</label>
+            <input id="buyer" placeholder="e.g. John Doe" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="product">Product Details</label>
+            <input id="product" placeholder="e.g. MacBook Pro" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="amount">Base Amount (USD)</label>
+            <input id="amount" type="number" placeholder="0.00" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="gst">GST Rate (%)</label>
+            <input id="gst" type="number" placeholder="18" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+            <label for="date">Invoice Date</label>
+            <input id="date" type="date" oninput="updatePreview()">
+        </div>
+        <button id="storeBtn" class="btn-primary" onclick="storeInvoice()">Submit to Blockchain</button>
+    </section>
+
+    <!-- LIVE PREVIEW SECTION -->
+    <section class="card preview-card">
+        <h2 class="card-title" style="color: white;">Digital Invoice Preview</h2>
+        <div class="preview-header">
+            <div>
+                <div id="previewSeller" style="font-weight: 600; font-size: 1.1rem;">-</div>
+                <div style="font-size: 0.75rem; opacity: 0.6;">FROM SELLER</div>
+            </div>
+            <div style="text-align: right;">
+                <div id="previewId" style="font-weight: 600;">#0000</div>
+                <div id="previewDate" style="font-size: 0.75rem; opacity: 0.6;">-</div>
+            </div>
+        </div>
+
+        <div class="preview-row">
+            <span class="preview-label">Buyer</span>
+            <span id="previewBuyer">-</span>
+        </div>
+        <div class="preview-row">
+            <span class="preview-label">Product</span>
+            <span id="previewProduct">-</span>
+        </div>
+        <div class="preview-row" style="margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1rem;">
+            <span class="preview-label">Base Amount</span>
+            <span id="previewBase">$0.00</span>
+        </div>
+        <div class="preview-row">
+            <span class="preview-label">GST Tax</span>
+            <span id="previewGst">$0.00</span>
+        </div>
+        
+        <div class="preview-total">
+            <span>Total Payable</span>
+            <span id="previewTotal">$0.00</span>
+        </div>
+
+        <div style="margin-top: 2rem; background: rgba(255, 255, 255, 0.03); padding: 1rem; border-radius: 12px; font-size: 0.7rem; font-family: monospace; word-break: break-all;">
+            <div style="opacity: 0.4; margin-bottom: 0.25rem;">BLOCKCHAIN CHECKSUM</div>
+            <div id="previewHash">PENDING COMMIT...</div>
+        </div>
+    </section>
+
+    <!-- VERIFY SECTION -->
+    <section class="card" style="grid-column: 1 / -1;">
+        <h2 class="card-title">Auditor Verification</h2>
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">Verify the authenticity of a GST invoice by its on-chain digital signature.</p>
+        
+        <div class="auditor-grid">
+            <div class="form-group">
+                <input id="verifyId" placeholder="Invoice ID">
+            </div>
+            <div class="form-group">
+                <input id="verifySeller" placeholder="Seller Name">
+            </div>
+            <div class="form-group">
+                <input id="verifyBuyer" placeholder="Buyer Name">
+            </div>
+            <div class="form-group">
+                <input id="verifyProduct" placeholder="Product">
+            </div>
+            <div class="form-group">
+                <input id="verifyAmount" type="number" placeholder="Amount">
+            </div>
+            <div class="form-group">
+                <input id="verifyGst" type="number" placeholder="GST %">
+            </div>
+            <div class="form-group">
+                <input id="verifyDate" type="date">
+            </div>
+        </div>
+        
+        <button class="btn-primary" onclick="verifyInvoice()" style="margin-top: 1rem;">Run Cryptographic Verification</button>
+        
+        <div id="resultContainer" style="margin-top: 1.5rem; padding: 1rem; border-radius: 12px; display: none; text-align: center; font-weight: 600;">
+            <span id="resultIcon" style="margin-right: 0.5rem;"></span>
+            <span id="resultText"></span>
+        </div>
+    </section>
+    <!-- TRANSACTION HISTORY SECTION -->
+    <section class="card" style="grid-column: 1 / -1; margin-top: 2rem;">
+        <h2 class="card-title">Transaction Ledger</h2>
+        <div class="table-container">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Seller</th>
+                        <th>Buyer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <!-- Dynamic Content -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div id="notification"></div>
+
+<!-- External Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
